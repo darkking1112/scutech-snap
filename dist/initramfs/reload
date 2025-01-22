@@ -1,0 +1,14 @@
+#!/bin/sh
+
+ls /etc/scutech/dla/mnt/etc/scutech/dla/reload_* > /dev/null 2>&1
+
+if [ "$?" = "0" ]; then
+	FILES="/etc/scutech/dla/mnt/etc/scutech/dla/reload_*"
+else
+	exit
+fi
+
+for f in $FILES
+do
+	$f
+done

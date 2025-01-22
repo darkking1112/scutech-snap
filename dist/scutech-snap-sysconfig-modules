@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ ! -c /dev/scutech-snap-ctl ] ; then
+	exec /sbin/modprobe scutech-snap >/dev/null 2>&1
+fi

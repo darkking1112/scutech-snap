@@ -1,0 +1,28 @@
+#!/bin/sh
+
+PREREQ=""
+
+prereqs()
+{
+	echo "${PREREQ}"
+}
+
+case "${1}" in
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+mkdir -p ${DESTDIR}/etc/scutech/dla/mnt
+copy_exec /sbin/blkid
+copy_exec /sbin/blockdev
+copy_exec /usr/bin/elioctl
+copy_exec /var/lib/scutech/dla/reload /sbin/scutech_reload
+
+manual_add_modules scutech-snap
+
+exit 0
+
