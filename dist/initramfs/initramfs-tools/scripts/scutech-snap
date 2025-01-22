@@ -1,0 +1,66 @@
+#!/bin/sh
+
+PREREQ=""
+
+prereqs()
+{
+    echo "$PREREQ"
+}
+
+case $1 in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+modprobe scutech-snap
+
+rbd="${ROOT#block:}"
+if [ -n "$rbd" ]; then
+    case "$rbd" in
+        LABEL=*)
+            rbd="$(echo $rbd | sed 's,/,\\x2f,g')"
+            rbd="/dev/disk/by-label/${rbd#LABEL=}"
+            ;;
+        UUID=*)
+            rbd="/dev/disk/by-uuid/${ROOT#UUID=}"
+            ;;
+        PARTLABEL=*)
+            rbd="/dev/disk/by-partlabel/${rbd#PARTLABEL=}"
+            ;;
+        PARTUUID=*)
+            rbd="/dev/disk/by-partuuid/${rbd#PARTUUID=}"
+            ;;
+    esac
+
+    echo "scutech-snap: root block device = $rbd" > /dev/kmsg
+
+    # Device might not be ready
+    if [ ! -b "$rbd" ]; then
+        udevadm settle
+    fi
+
+    # Kernel cmdline might not specify rootfstype
+    [ -z "$ROOTFSTYPE" ] && ROOTFSTYPE=$(blkid -s TYPE -o value $rbd)
+
+    echo "scutech-snap: mounting $rbd as $ROOTFSTYPE" > /dev/kmsg
+    blockdev --setro $rbd
+    if mount -t $ROOTFSTYPE -o ro $rbd /etc/scutech/dla/mnt > /dev/kmsg ; then
+        udevadm settle
+
+        if [ -x /sbin/scutech_reload ]; then
+            /sbin/scutech_reload
+        else
+            echo "scutech-snap: error: cannot reload tracking data: missing /sbin/scutech_reload" > /dev/kmsg
+        fi
+
+        umount -f /etc/scutech/dla/mnt > /dev/kmsg
+    else
+        echo "scutech-snap: error: cannot reload tracking data: rootfs cannot be mount as readonly" > /dev/kmsg
+    fi
+
+    blockdev --setrw $rbd
+fi
+
+exit 0
