@@ -1,0 +1,48 @@
+name: Build Linux in libc 2.31
+
+on:
+  workflow_dispatch: # 手动触发
+
+jobs:
+  # 这里是在特定主机中直接编译，如果拉取容器编译需要注意编译时候路径问题
+  build_linux_libc_2_31:
+    runs-on: ubuntu-20.04 # default glibc 2.31
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y make g++ dkms git
+
+    - name: Clone debbuild repository
+      run: |
+        git clone https://github.com/debbuild/debbuild.git
+        cd debbuild
+        ./configure
+        make
+        sudo make install
+
+    - name: Check glibc version
+      run: ldd --version
+
+    - name: Check make version
+      run: make --version
+
+    - name: Build Deb Package
+      run: sudo make deb
+
+    # 暂时不需要邮件通知编译结果
+    #- name: Set workflow conclusion
+    #  if: always()
+    #  run: echo "GITHUB_WORKFLOW_CONCLUSION=${{ job.status }}" >> $GITHUB_ENV
+
+    - name: 上传编译的deb包
+      uses: actions/upload-artifact@v4
+      with:
+        name: deb pages
+        path: |
+          ${{github.workspace}}/pkgbuild/DEBS/*
+
