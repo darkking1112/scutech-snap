@@ -199,7 +199,7 @@ def main():
         return -1
 
     # 设置目标服务地址
-    CLIENT_ADDR = "172.25.2.113"
+    CLIENT_ADDR = "127.0.0.1"
     CLIENT_PORT = 20794
     server_addr = (CLIENT_ADDR, CLIENT_PORT)
 

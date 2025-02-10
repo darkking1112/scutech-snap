@@ -45,7 +45,7 @@ struct event_desc {
 #define CWHT  "\x1B[37m"
 #define CRESET "\033[0m"
 
-#define CLIENT_ADDR "172.25.2.113"
+#define CLIENT_ADDR "127.0.0.1"
 #define CLIENT_PORT 20794
 
 struct event_desc event_text_desc[] = {
