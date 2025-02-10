@@ -16,16 +16,6 @@ static void nl_recv_msg(struct sk_buff *skb)
 	nlmsg_free(skb);
 }
 
-struct msg_header_t {
-	uint8_t type;
-	uint64_t seq_num;
-	uint64_t timestamp;
-	struct params_t params;
-	struct code_info_t source;
-    uint64_t data_size;
-    char data[4096];
-} __attribute__((packed));
-
 int nl_send_event(enum msg_type_t type, const char *func, int line, struct params_t *params)
 {
 	struct sk_buff *skb;
